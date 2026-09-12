@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package moviepubsub;
+
+// Tipos de tópicos que podem existir para um filme.
+// Adicionar um novo tipo aqui é o único passo necessário para criar
+// uma nova categoria de assunto (ex: TRAILER, BASTIDORES, PREMIACAO...).
+enum TopicType {
+  REVIEW = 0;      // Nova review/crítica do filme
+  RATING = 1;      // Nova nota/avaliação do filme
+  ACTOR_NEWS = 2;   // Notícia sobre algum ator/atriz do elenco
+  TRAILER = 3;      // Novo trailer/teaser lançado
+  BOX_OFFICE = 4;   // Atualização de bilheteria
+}
+
+// Requisição de inscrição (assinatura) em um filme.
+// Se "topics" vier vazio, o assinante recebe TODOS os tópicos daquele filme.
+message SubscribeRequest {
+  string movie = 1;
+  repeated TopicType topics = 2;
+  string subscriber_name = 3; // apenas para logs/identificação no servidor
+}
+
+// Mensagem publicada, entregue via stream para os assinantes.
+message Message {
+  string movie = 1;
+  TopicType topic = 2;
+  string content = 3;
+  string timestamp = 4;
+  string author = 5;       // autor da review / fonte da notícia (opcional)
+  float rating_value = 6;   // usado apenas quando topic == RATING
+}
+
+// Requisição para publicar uma nova mensagem em um tópico de um filme.
+message PublishRequest {
+  string movie = 1;
+  TopicType topic = 2;
+  string content = 3;
+  string author = 4;
+  float rating_value = 5;
+}
+
+message PublishResponse {
+  bool success = 1;
+  string detail = 2;
+  int32 subscribers_notified = 3;
+}
+
+service MoviePubSub {
+  // Assina um filme (com filtro opcional de tópicos) e recebe um stream
+  // contínuo de mensagens publicadas a partir do momento da inscrição.
+  rpc Subscribe(SubscribeRequest) returns (stream Message);
+
+  // Publica uma nova mensagem em um tópico de um filme.
+  rpc Publish(PublishRequest) returns (PublishResponse);
+}

@@ -1,4 +1,4 @@
-# Movie Pub/Sub (gRPC)
+# Moviefication Pub/Sub (gRPC)
 
 Aplicação de publicar/assinar (pub/sub) em gRPC, focada em tópicos sobre
 filmes específicos (ex: "Titanic"). Cada filme pode ter vários tipos de
